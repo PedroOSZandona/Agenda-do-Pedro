@@ -1062,6 +1062,20 @@ h1, h2, h3, h4, p {
   flex-wrap: wrap;
 }
 
+.cal-count-badge {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
 .cal-chips {
   display: flex;
   flex-direction: column;
@@ -2067,6 +2081,134 @@ h1, h2, h3, h4, p {
   font-weight: 600;
 }
 
+/* Modal Janelinha do Dia */
+.day-popup-header {
+  gap: 8px;
+}
+
+.day-popup-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.day-popup-title-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.day-popup-title-wrap h3 {
+  font-size: 1rem;
+  line-height: 1.25;
+  text-transform: capitalize;
+}
+
+.day-popup-body {
+  gap: 16px;
+}
+
+.day-popup-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.day-popup-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.day-popup-section-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+.day-popup-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-muted);
+}
+
+.day-popup-item.pessoal {
+  border-left: 4px solid var(--blue);
+}
+
+.day-popup-item.trabalho {
+  border-left: 4px solid var(--amber);
+}
+
+.day-popup-checkbox {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  accent-color: var(--primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.day-popup-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.day-popup-item-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+  word-break: break-word;
+}
+
+.day-popup-item-title.completed-text {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.day-popup-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 5px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.day-popup-time-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  font-weight: 700;
+  color: var(--text-main);
+  font-size: 0.78rem;
+}
+
+.day-popup-item-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+#agendaModalBackdrop {
+  z-index: 120;
+}
+
 /* Toasts */
 .toast-container {
   position: fixed;
@@ -2128,6 +2270,31 @@ h1, h2, h3, h4, p {
   }
   .form-grid-3 {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .cal-chips {
+    display: none;
+  }
+
+  .cal-count-badge {
+    display: inline-flex;
+  }
+
+  .cal-dots {
+    gap: 4px;
+    align-items: center;
+  }
+
+  .cal-dots .dot {
+    width: 9px;
+    height: 9px;
+  }
+
+  .cal-day {
+    min-height: 58px;
+    justify-content: space-between;
   }
 }
 

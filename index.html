@@ -747,6 +747,60 @@
     </div>
   </div>
 
+  <!-- MODAL 5: JANELINHA DO DIA (AGENDA MOBILE / RÁPIDA) -->
+  <div class="modal-backdrop hidden" id="dayPopupModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="dayPopupTitle">
+    <div class="modal-card modal-lg day-popup-card">
+      <div class="modal-header day-popup-header">
+        <div class="day-popup-nav">
+          <button type="button" class="btn-icon" id="btnPopupPrevDay" title="Dia anterior" aria-label="Dia anterior">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <div class="day-popup-title-wrap">
+            <span class="day-badge" id="dayPopupBadge">Hoje</span>
+            <h3 id="dayPopupTitle">Quarta-feira, 18 de Novembro</h3>
+          </div>
+          <button type="button" class="btn-icon" id="btnPopupNextDay" title="Próximo dia" aria-label="Próximo dia">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+        <button type="button" class="btn-icon close-modal" data-close-modal="dayPopupModalBackdrop" aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal-body day-popup-body">
+        <div class="day-popup-top-bar">
+          <span class="panel-subtitle" id="dayPopupSummary">0 item(ns) neste dia</span>
+          <button type="button" class="btn btn-sm btn-primary" id="btnPopupOpenFullAgendaModal">+ Compromisso / Tarefa Completa</button>
+        </div>
+
+        <form class="quick-task-form" id="dayPopupQuickTaskForm">
+          <input type="text" id="dayPopupQuickTaskTitle" placeholder="Adicionar tarefa rápida para este dia..." required>
+          <select id="dayPopupQuickTaskScope" aria-label="Escopo da tarefa">
+            <option value="pessoal">Pessoal</option>
+            <option value="trabalho">Trabalho</option>
+          </select>
+          <select id="dayPopupQuickTaskPriority" aria-label="Prioridade">
+            <option value="media">Média</option>
+            <option value="alta">Alta</option>
+            <option value="baixa">Baixa</option>
+          </select>
+          <button type="submit" class="btn btn-sm btn-secondary">Adicionar</button>
+        </form>
+
+        <div class="day-popup-section">
+          <h4 class="day-popup-section-title">Tarefas &amp; Compromissos do Dia</h4>
+          <div id="dayPopupItemsList" class="stack-list"></div>
+        </div>
+
+        <div class="day-popup-section hidden" id="dayPopupInvoicesSection">
+          <h4 class="day-popup-section-title">Vencimentos de Fatura no Dia</h4>
+          <div id="dayPopupInvoicesList" class="stack-list"></div>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 12px 20px;">
+        <button type="button" class="btn btn-secondary close-modal" data-close-modal="dayPopupModalBackdrop">Fechar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast de Notificação -->
   <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 

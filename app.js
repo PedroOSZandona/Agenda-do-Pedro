@@ -648,6 +648,10 @@
     renderAgendaTab();
     renderFinancesTab();
     renderCardsTab();
+    const dayPopupEl = document.getElementById('dayPopupModalBackdrop');
+    if (dayPopupEl && !dayPopupEl.classList.contains('hidden')) {
+      renderDayPopupModal();
+    }
   }
 
   function switchTab(tabName) {
@@ -1088,11 +1092,12 @@
         <button type="button" class="${classes}" data-select-date="${cell.iso}">
           <div class="cal-day-top">
             <span class="cal-day-num">${cell.day}</span>
-            <div class="cal-dots">
-              ${hasPessoal ? '<span class="dot dot-pessoal" title="Pessoal"></span>' : ''}
-              ${hasTrabalho ? '<span class="dot dot-trabalho" title="Trabalho"></span>' : ''}
-              ${dayInvoices.length ? '<span class="dot dot-invoice" title="Vencimento de fatura"></span>' : ''}
-            </div>
+            ${totalItems > 0 ? `<span class="cal-count-badge" title="${totalItems} item(ns)">${totalItems}</span>` : ''}
+          </div>
+          <div class="cal-dots">
+            ${hasPessoal ? '<span class="dot dot-pessoal" title="Pessoal"></span>' : ''}
+            ${hasTrabalho ? '<span class="dot dot-trabalho" title="Trabalho"></span>' : ''}
+            ${dayInvoices.length ? '<span class="dot dot-invoice" title="Vencimento de fatura"></span>' : ''}
           </div>
           <div class="cal-chips">${chips.join('')}</div>
         </button>
@@ -1177,6 +1182,92 @@
       `;
     }
     timeline.innerHTML = hoursHtml;
+  }
+
+  function openDayPopupModal(isoDate) {
+    uiState.selectedDate = isoDate;
+    uiState.selectedMonth = isoDate.slice(0, 7);
+    renderAll();
+    renderDayPopupModal();
+    document.getElementById('dayPopupModalBackdrop').classList.remove('hidden');
+  }
+
+  function renderDayPopupModal() {
+    const dateISO = uiState.selectedDate;
+    const todayISO = getTodayISO();
+    document.getElementById('dayPopupBadge').textContent = dateISO === todayISO ? 'Hoje' : formatDateBR(dateISO);
+    document.getElementById('dayPopupTitle').textContent = formatFullDayTitle(dateISO);
+
+    const dayItems = appData.agendaItems
+      .filter((a) => a.date === dateISO)
+      .filter((a) => uiState.agendaScope === 'all' || a.scope === uiState.agendaScope)
+      .sort((a, b) => {
+        if (a.itemType !== b.itemType) return a.itemType === 'event' ? -1 : 1;
+        return (a.startTime || '99:99').localeCompare(b.startTime || '99:99');
+      });
+
+    const doneCount = dayItems.filter((i) => i.completed).length;
+    document.getElementById('dayPopupSummary').textContent =
+      `${dayItems.length} item(ns) neste dia (${doneCount} concluído(s))`;
+
+    const listEl = document.getElementById('dayPopupItemsList');
+    if (dayItems.length === 0) {
+      listEl.innerHTML = '<div class="empty-state">Nenhuma tarefa ou compromisso para este dia. Adicione acima!</div>';
+    } else {
+      listEl.innerHTML = dayItems.map((item) => {
+        const timeText = item.itemType === 'event' && item.startTime
+          ? `🕒 ${item.startTime}${item.endTime ? ' – ' + item.endTime : ''}`
+          : '☑️ Tarefa';
+        return `
+          <div class="day-popup-item ${item.scope}">
+            <input type="checkbox" class="day-popup-checkbox" data-toggle-agenda="${escapeHtml(item.id)}" ${item.completed ? 'checked' : ''} aria-label="Marcar ${escapeHtml(item.title)}">
+            <div class="day-popup-item-content">
+              <div class="day-popup-item-title ${item.completed ? 'completed-text' : ''}">
+                ${escapeHtml(item.title)}
+              </div>
+              <div class="day-popup-item-meta">
+                <span class="day-popup-time-pill">${escapeHtml(timeText)}</span>
+                <span class="badge badge-${item.scope}">${SCOPE_LABELS[item.scope]}</span>
+                <span class="badge badge-prio-${item.priority}">${PRIORITY_LABELS[item.priority]}</span>
+              </div>
+              ${item.notes ? `<p class="panel-subtitle" style="margin-top:6px;">${escapeHtml(item.notes)}</p>` : ''}
+              <div class="day-popup-item-actions">
+                <button type="button" class="btn btn-sm btn-secondary" data-edit-agenda="${escapeHtml(item.id)}">Editar</button>
+                <button type="button" class="btn btn-sm btn-danger" data-delete-agenda="${escapeHtml(item.id)}">Excluir</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Vencimentos de fatura no dia
+    const [selY, selM, selD] = dateISO.split('-').map(Number);
+    const selYM = `${selY}-${pad2(selM)}`;
+    const maxD = daysInMonth(selY, selM);
+    const dueCardsToday = appData.cards.filter((c) => Math.min(Number(c.dueDay), maxD) === selD);
+
+    const invoicesSection = document.getElementById('dayPopupInvoicesSection');
+    const invoicesList = document.getElementById('dayPopupInvoicesList');
+    if (dueCardsToday.length === 0) {
+      invoicesSection.classList.add('hidden');
+      invoicesList.innerHTML = '';
+    } else {
+      invoicesSection.classList.remove('hidden');
+      invoicesList.innerHTML = dueCardsToday.map((card) => {
+        const inv = getCardInvoiceForMonth(card.id, selYM);
+        return `
+          <div class="invoice-alert-banner" style="margin-bottom:0;">
+            <div>
+              <strong>Vencimento Fatura ${escapeHtml(card.name)}</strong>
+              <span class="badge ${inv.isPaid ? 'badge-paid' : 'badge-open'}" style="margin-left:6px;">${inv.isPaid ? 'Paga' : 'Em aberto'}</span>
+              <div style="font-size:0.8rem; margin-top:2px;">Fatura de ${formatShortMonthLabel(selYM)}: <strong>${formatBRL(inv.total)}</strong></div>
+            </div>
+            <button type="button" class="btn btn-sm btn-secondary" data-goto-tab="cards">Ver Fatura</button>
+          </div>
+        `;
+      }).join('');
+    }
   }
 
   // =========================================================================
@@ -2727,6 +2818,43 @@
       openAgendaModal({ date: uiState.selectedDate });
     });
 
+    // Eventos da Janelinha do Dia
+    document.getElementById('btnPopupPrevDay').addEventListener('click', () => {
+      openDayPopupModal(addDaysToISO(uiState.selectedDate, -1));
+    });
+
+    document.getElementById('btnPopupNextDay').addEventListener('click', () => {
+      openDayPopupModal(addDaysToISO(uiState.selectedDate, 1));
+    });
+
+    document.getElementById('btnPopupOpenFullAgendaModal').addEventListener('click', () => {
+      closeModal('dayPopupModalBackdrop');
+      openAgendaModal({ date: uiState.selectedDate });
+    });
+
+    document.getElementById('dayPopupQuickTaskForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const titleInput = document.getElementById('dayPopupQuickTaskTitle');
+      const title = titleInput.value.trim();
+      if (!title) return;
+      appData.agendaItems.push({
+        id: uid('ag'),
+        title,
+        date: uiState.selectedDate,
+        itemType: 'task',
+        scope: document.getElementById('dayPopupQuickTaskScope').value,
+        startTime: '',
+        endTime: '',
+        priority: document.getElementById('dayPopupQuickTaskPriority').value,
+        completed: false,
+        notes: ''
+      });
+      titleInput.value = '';
+      saveData();
+      renderAll();
+      showToast('Tarefa adicionada!', 'success');
+    });
+
     // Adição rápida de tarefa no dia
     document.getElementById('quickTaskForm').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -2846,6 +2974,11 @@
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        const agendaModal = document.getElementById('agendaModalBackdrop');
+        if (!agendaModal.classList.contains('hidden')) {
+          agendaModal.classList.add('hidden');
+          return;
+        }
         document.querySelectorAll('.modal-backdrop:not(.hidden)').forEach((m) => m.classList.add('hidden'));
       }
     });
@@ -2854,6 +2987,7 @@
     document.addEventListener('click', (e) => {
       const gotoBtn = e.target.closest('[data-goto-tab]');
       if (gotoBtn) {
+        closeModal('dayPopupModalBackdrop');
         if (gotoBtn.dataset.financeFilter) {
           uiState.financeDirection = 'out';
           uiState.financeTypeFilter = gotoBtn.dataset.financeFilter;
@@ -2865,9 +2999,7 @@
 
       const calDayBtn = e.target.closest('[data-select-date]');
       if (calDayBtn) {
-        uiState.selectedDate = calDayBtn.dataset.selectDate;
-        uiState.selectedMonth = uiState.selectedDate.slice(0, 7);
-        renderAll();
+        openDayPopupModal(calDayBtn.dataset.selectDate);
         return;
       }
 
