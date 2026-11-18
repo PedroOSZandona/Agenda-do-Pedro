@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Life &amp; Finanças">
+  <title>Central Life &amp; Finanças — Agenda, Cartões e Gastos</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Cabeçalho Fixo -->
+    <header class="top-header">
+      <div class="header-left">
+        <div class="brand">
+          <div class="brand-logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="3"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+              <path d="M12 14v4M10 16h4"></path>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h1>Central Life &amp; Finanças</h1>
+            <p>Agenda Pessoal/Trabalho &bull; Cartões, Parcelas e Gastos</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <div class="month-navigator" role="group" aria-label="Seletor de mês de referência">
+          <button type="button" class="btn-icon" id="btnPrevMonth" title="Mês anterior" aria-label="Mês anterior">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <span class="current-month-label" id="currentMonthLabel">Novembro 2026</span>
+          <button type="button" class="btn-icon" id="btnNextMonth" title="Próximo mês" aria-label="Próximo mês">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+          <button type="button" class="btn-today" id="btnGoToday" title="Ir para o mês e dia atual">Hoje</button>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button type="button" class="btn btn-primary" id="btnQuickNewTransaction">
+          <span>+ Lançar Compra / Gasto</span>
+        </button>
+        <button type="button" class="btn btn-secondary" id="btnQuickNewAgenda">
+          <span>+ Compromisso / Tarefa</span>
+        </button>
+        <div class="header-utility-actions">
+          <button type="button" class="btn btn-cloud" id="btnCloudSync" title="Configurar sincronização automática PC e Celular">
+            <span class="cloud-dot" id="cloudStatusDot"></span>
+            <span id="cloudStatusText">Nuvem</span>
+          </button>
+          <div class="backup-dropdown">
+            <button type="button" class="btn btn-ghost" id="btnToggleDataMenu" aria-expanded="false" aria-haspopup="true" title="Backup e Dados">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="19" cy="12" r="1"></circle>
+                <circle cx="5" cy="12" r="1"></circle>
+              </svg>
+              <span class="hide-sm">Dados</span>
+            </button>
+            <div class="dropdown-menu hidden" id="dataDropdownMenu">
+              <button type="button" class="dropdown-item" id="btnCopyBackupText">Copiar Backup (Para enviar ao Celular)</button>
+              <button type="button" class="dropdown-item" id="btnPasteBackupText">Colar Backup (Recebido do PC/Celular)</button>
+              <div class="dropdown-divider"></div>
+              <button type="button" class="dropdown-item" id="btnExportJson">Exportar Backup (JSON)</button>
+              <label class="dropdown-item file-label" for="inputImportJson">Importar Backup (JSON)</label>
+              <input type="file" id="inputImportJson" accept=".json,application/json" class="sr-only">
+              <div class="dropdown-divider"></div>
+              <button type="button" class="dropdown-item" id="btnRestoreExamples">Restaurar Exemplos Iniciais</button>
+              <button type="button" class="dropdown-item danger" id="btnClearAllData">Limpar Tudo / Começar do Zero</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navegação por Abas -->
+    <nav class="main-tabs" aria-label="Navegação principal">
+      <button type="button" class="tab-btn active" data-tab="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></svg>
+        <span>Visão Geral</span>
+      </button>
+      <button type="button" class="tab-btn" data-tab="agenda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <span>Agenda &amp; Dia</span>
+      </button>
+      <button type="button" class="tab-btn" data-tab="finances">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        <span>Finanças &amp; Gastos</span>
+      </button>
+      <button type="button" class="tab-btn" data-tab="cards">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+        <span>Cartões &amp; Parcelas</span>
+      </button>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+      <!-- ABA 1: VISÃO GERAL -->
+      <section id="tab-overview" class="tab-panel active">
+        <div class="summary-cards-grid" id="overviewSummaryCards">
+          <!-- Renderizado via JS -->
+        </div>
+
+        <div class="overview-grid">
+          <!-- Coluna Esquerda: Faturas & Parcelamentos -->
+          <div class="overview-col">
+            <div class="panel-card">
+              <div class="panel-header">
+                <div>
+                  <h2>O que vou pagar de Cartão</h2>
+                  <p class="panel-subtitle" id="overviewCardsSubtitle">Faturas do mês selecionado</p>
+                </div>
+                <button type="button" class="btn btn-sm btn-ghost" data-goto-tab="cards">Gerenciar Cartões</button>
+              </div>
+              <div id="overviewCardInvoices" class="stack-list"></div>
+            </div>
+
+            <div class="panel-card">
+              <div class="panel-header">
+                <div>
+                  <h2>Compras Parceladas Ativas</h2>
+                  <p class="panel-subtitle">Parcelas cobradas neste mês</p>
+                </div>
+                <button type="button" class="btn btn-sm btn-ghost" data-goto-tab="finances" data-finance-filter="installments">Ver todas</button>
+              </div>
+              <div id="overviewInstallmentsList" class="stack-list"></div>
+            </div>
+          </div>
+
+          <!-- Coluna Direita: Agenda do Dia & Compras Recentes -->
+          <div class="overview-col">
+            <div class="panel-card">
+              <div class="panel-header wrap">
+                <div>
+                  <h2 id="overviewAgendaTitle">Minha Agenda de Hoje</h2>
+                  <p class="panel-subtitle" id="overviewAgendaSubtitle">Compromissos e tarefas do dia selecionado</p>
+                </div>
+                <div class="overview-agenda-controls">
+                  <div class="day-navigator" role="group" aria-label="Navegar pelos dias da agenda">
+                    <button type="button" class="btn-icon" id="btnOverviewPrevDay" title="Dia anterior" aria-label="Dia anterior">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <span class="day-nav-label" id="overviewDayNavLabel">Hoje</span>
+                    <button type="button" class="btn-icon" id="btnOverviewNextDay" title="Próximo dia" aria-label="Próximo dia">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                    <button type="button" class="btn-today" id="btnOverviewToday" title="Voltar para hoje">Hoje</button>
+                  </div>
+                  <div class="segmented-control sm" id="overviewAgendaFilter">
+                    <button type="button" class="seg-btn active" data-scope="all">Todos</button>
+                    <button type="button" class="seg-btn" data-scope="pessoal">Pessoal</button>
+                    <button type="button" class="seg-btn" data-scope="trabalho">Trabalho</button>
+                  </div>
+                </div>
+              </div>
+              <div id="overviewAgendaList" class="stack-list"></div>
+              <div class="panel-footer">
+                <button type="button" class="btn btn-sm btn-ghost" data-goto-tab="agenda">Abrir Calendário e Horários</button>
+              </div>
+            </div>
+
+            <div class="panel-card">
+              <div class="panel-header wrap">
+                <div>
+                  <h2 id="overviewRecentTitle">Movimentações do Mês</h2>
+                  <p class="panel-subtitle" id="overviewRecentSubtitle">Acompanhe separado o que saiu e o que entrou</p>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <div class="segmented-control sm" id="overviewTxTabSwitch">
+                    <button type="button" class="seg-btn active" data-overview-tx-tab="out">O que Saiu</button>
+                    <button type="button" class="seg-btn" data-overview-tx-tab="in">O que Entrou</button>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-ghost" data-goto-tab="finances">Ver todos</button>
+                </div>
+              </div>
+              <div id="overviewRecentExpenses" class="stack-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 2: AGENDA -->
+      <section id="tab-agenda" class="tab-panel">
+        <div class="agenda-toolbar panel-card compact">
+          <div class="toolbar-group">
+            <span class="toolbar-label">Filtrar Contexto:</span>
+            <div class="segmented-control" id="agendaScopeFilter">
+              <button type="button" class="seg-btn active" data-scope="all">Todos</button>
+              <button type="button" class="seg-btn scope-pessoal-btn" data-scope="pessoal">Pessoal</button>
+              <button type="button" class="seg-btn scope-trabalho-btn" data-scope="trabalho">Trabalho</button>
+            </div>
+          </div>
+          <div class="toolbar-group date-range-group">
+            <span class="toolbar-label">Período:</span>
+            <label class="range-field">
+              <span>De</span>
+              <input type="date" id="agendaStartDate" aria-label="Data inicial">
+            </label>
+            <label class="range-field">
+              <span>Até</span>
+              <input type="date" id="agendaEndDate" aria-label="Data final">
+            </label>
+            <button type="button" class="btn btn-sm btn-ghost hidden" id="btnClearAgendaRange">Limpar Período</button>
+          </div>
+        </div>
+
+        <div class="agenda-split-layout">
+          <!-- Calendário Mensal -->
+          <div class="panel-card calendar-panel">
+            <div class="panel-header wrap">
+              <div>
+                <div class="calendar-month-nav" role="group" aria-label="Navegar pelos meses do calendário">
+                  <button type="button" class="btn-icon" id="btnCalPrevMonth" title="Mês anterior" aria-label="Mês anterior">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                  </button>
+                  <h2 id="calendarTitle">Novembro 2026</h2>
+                  <button type="button" class="btn-icon" id="btnCalNextMonth" title="Próximo mês" aria-label="Próximo mês">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </button>
+                  <button type="button" class="btn-today" id="btnCalToday" title="Ir para o mês e dia atual">Hoje</button>
+                </div>
+                <p class="panel-subtitle">Clique em um dia para ver horários e tarefas</p>
+              </div>
+              <div class="calendar-legend">
+                <span class="legend-item"><i class="dot dot-pessoal"></i> Pessoal</span>
+                <span class="legend-item"><i class="dot dot-trabalho"></i> Trabalho</span>
+                <span class="legend-item"><i class="dot dot-invoice"></i> Fatura</span>
+              </div>
+            </div>
+            <div class="calendar-weekdays">
+              <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+              <!-- Renderizado via JS -->
+            </div>
+          </div>
+
+          <!-- Painel do Dia Selecionado e Filtro por Período -->
+          <div class="day-detail-column">
+            <!-- Compromissos & Tarefas do Período (visível quando Data Inicial / Final estiver preenchida) -->
+            <div class="panel-card hidden" id="agendaRangeResultsCard">
+              <div class="panel-header wrap">
+                <div>
+                  <h3>Compromissos &amp; Tarefas do Período</h3>
+                  <p class="panel-subtitle" id="agendaRangeSubtitle"></p>
+                </div>
+              </div>
+              <div id="agendaRangeList" class="stack-list"></div>
+            </div>
+
+            <div class="panel-card day-header-card">
+              <div class="day-header-info">
+                <span class="day-badge" id="selectedDayBadge">Hoje</span>
+                <h2 id="selectedDayFullTitle">Quarta-feira, 18 de Novembro</h2>
+              </div>
+              <div class="day-header-actions">
+                <button type="button" class="btn btn-sm btn-primary" id="btnAddAgendaForDay">+ Compromisso / Tarefa</button>
+              </div>
+            </div>
+
+            <!-- 1. Checklist de Tarefas do Dia -->
+            <div class="panel-card">
+              <div class="panel-header">
+                <div>
+                  <h3>Checklist de Tarefas do Dia</h3>
+                  <p class="panel-subtitle" id="dayTasksCount">0 tarefas</p>
+                </div>
+              </div>
+              <form class="quick-task-form" id="quickTaskForm">
+                <input type="text" id="quickTaskTitle" placeholder="Adicionar tarefa rápida para este dia..." required>
+                <select id="quickTaskScope" aria-label="Escopo da tarefa">
+                  <option value="pessoal">Pessoal</option>
+                  <option value="trabalho">Trabalho</option>
+                </select>
+                <select id="quickTaskPriority" aria-label="Prioridade">
+                  <option value="media">Média</option>
+                  <option value="alta">Alta</option>
+                  <option value="baixa">Baixa</option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-secondary">Adicionar</button>
+              </form>
+              <div id="dayTasksList" class="stack-list"></div>
+            </div>
+
+            <!-- 2. Blocos de Horário por Hora -->
+            <div class="panel-card">
+              <div class="panel-header">
+                <div>
+                  <h3>Grade de Horários (Estilo Calendário)</h3>
+                  <p class="panel-subtitle">Clique em qualquer horário para agendar um compromisso</p>
+                </div>
+                <button type="button" class="btn btn-sm btn-ghost" id="btnToggleEarlyHours">Mostrar 00h–05h</button>
+              </div>
+              <div id="dayHourlyTimeline" class="hourly-timeline"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 3: FINANÇAS & GASTOS -->
+      <section id="tab-finances" class="tab-panel">
+        <!-- Balanço de Fácil Visualização: Entrou vs Saiu -->
+        <div class="balance-banner-card" id="financesBalanceBanner">
+          <!-- Renderizado via JS -->
+        </div>
+
+        <!-- Painel Comparativo Visual (Cartão vs Outras Coisas + Categorias) -->
+        <div class="finances-comparison-grid two-cols" id="financesComparisonPanel">
+          <!-- Renderizado via JS -->
+        </div>
+
+        <!-- Abas Separadas (O que Saiu / O que Entrou) e Tabela de Lançamentos -->
+        <div class="panel-card">
+          <div class="direction-tabs-header">
+            <div class="direction-tabs" id="financeDirectionTabs" role="tablist" aria-label="Separar saídas e entradas">
+              <button type="button" class="direction-tab active out" role="tab" aria-selected="true" data-direction="out" id="tabBtnFinancesOut">
+                <span>O que Saiu (Gastos)</span>
+                <span class="direction-tab-total" id="tabFinancesOutTotal">R$ 0,00</span>
+              </button>
+              <button type="button" class="direction-tab in" role="tab" aria-selected="false" data-direction="in" id="tabBtnFinancesIn">
+                <span>O que Entrou (Receitas)</span>
+                <span class="direction-tab-total" id="tabFinancesInTotal">R$ 0,00</span>
+              </button>
+            </div>
+            <div class="direction-tabs-actions">
+              <button type="button" class="btn btn-sm btn-primary" id="btnAddExpenseShortcut">+ Lançar Gasto / Compra</button>
+              <button type="button" class="btn btn-sm btn-secondary" id="btnAddIncomeShortcut">+ Lançar Receita / Salário</button>
+            </div>
+          </div>
+
+          <div class="finances-controls">
+            <div class="filter-pills" id="financeTypeFilter">
+              <button type="button" class="pill-btn active" data-filter="all">Todos os Gastos</button>
+              <button type="button" class="pill-btn" data-filter="card">Só Cartão de Crédito</button>
+              <button type="button" class="pill-btn" data-filter="installments">Só Parcelados (k/N)</button>
+              <button type="button" class="pill-btn" data-filter="other">Só Outros Gastos (Pix, Débito...)</button>
+            </div>
+            <div class="finances-subfilters">
+              <select id="financeCardFilter" aria-label="Filtrar por cartão">
+                <option value="all">Todos os Cartões</option>
+              </select>
+              <input type="search" id="financeSearchInput" placeholder="Buscar descrição ou categoria...">
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Descrição</th>
+                  <th>Categoria</th>
+                  <th>Pagamento / Cartão</th>
+                  <th>Parcela no Mês</th>
+                  <th class="text-right">Valor no Mês</th>
+                  <th class="text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="financesTableBody">
+                <!-- Renderizado via JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer-summary" id="financesTableFooter"></div>
+        </div>
+      </section>
+
+      <!-- ABA 4: CARTÕES & PARCELAS -->
+      <section id="tab-cards" class="tab-panel">
+        <div class="section-top-bar">
+          <div>
+            <h2>Meus Cartões de Crédito &amp; Faturas</h2>
+            <p class="panel-subtitle">Controle separado do que você vai pagar em cada cartão e projeção das próximas parcelas</p>
+          </div>
+          <button type="button" class="btn btn-primary" id="btnNewCard">+ Cadastrar Novo Cartão</button>
+        </div>
+
+        <div id="cardsDetailGrid" class="cards-detail-grid">
+          <!-- Renderizado via JS -->
+        </div>
+
+        <div class="panel-card projection-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Projeção das Próximas Faturas (Próximos 6 Meses)</h2>
+              <p class="panel-subtitle">Quanto você já tem comprometido por causa das compras parceladas e lançamentos cadastrados</p>
+            </div>
+          </div>
+          <div id="cardsProjectionChart" class="projection-bars"></div>
+          <div class="table-responsive">
+            <table class="data-table" id="cardsProjectionTable">
+              <!-- Renderizado via JS -->
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL 1: LANÇAMENTO FINANCEIRO -->
+  <div class="modal-backdrop hidden" id="transactionModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="transactionModalTitle">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <h3 id="transactionModalTitle">Lançar Compra / Gasto</h3>
+        <button type="button" class="btn-icon close-modal" data-close-modal="transactionModalBackdrop" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="transactionForm" class="modal-body">
+        <input type="hidden" id="txId">
+
+        <div class="type-switcher" role="group" aria-label="Tipo de lançamento">
+          <button type="button" class="type-btn active expense" data-tx-type="expense">Gasto / Compra</button>
+          <button type="button" class="type-btn income" data-tx-type="income">Receita / Salário</button>
+        </div>
+        <input type="hidden" id="txType" value="expense">
+
+        <div class="form-grid-2">
+          <div class="form-group span-2">
+            <label for="txTitle">Descrição *</label>
+            <input type="text" id="txTitle" placeholder="Ex: Supermercado, Notebook, Uber, Salário..." required>
+          </div>
+
+          <div class="form-group span-2">
+            <label for="txCategory">Categoria *</label>
+            <select id="txCategory" required>
+              <option value="Compras">Compras</option>
+              <option value="Alimentação">Alimentação</option>
+              <option value="Moradia & Contas">Moradia &amp; Contas</option>
+              <option value="Transporte">Transporte</option>
+              <option value="Lazer">Lazer</option>
+              <option value="Saúde">Saúde</option>
+              <option value="Salário / Renda">Salário / Renda</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="txPurchaseDate">Data da Compra / Lançamento *</label>
+            <input type="date" id="txPurchaseDate" required>
+          </div>
+
+          <div class="form-group" id="txPaymentMethodGroup">
+            <label for="txPaymentMethod">Forma de Pagamento *</label>
+            <select id="txPaymentMethod" required>
+              <option value="card">Cartão de Crédito</option>
+              <option value="pix">Pix</option>
+              <option value="debit">Cartão de Débito</option>
+              <option value="cash">Dinheiro</option>
+              <option value="boleto">Boleto / Conta Fixa</option>
+            </select>
+          </div>
+
+          <div class="form-group span-2" id="txCardSelectGroup">
+            <label for="txCardId">Qual Cartão de Crédito? *</label>
+            <div class="input-with-action">
+              <select id="txCardId"></select>
+              <button type="button" class="btn btn-sm btn-ghost" id="btnQuickCreateCard">+ Novo Cartão</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="installment-box" id="txAmountInstallmentsBox">
+          <div class="amount-mode-row">
+            <label class="radio-pill">
+              <input type="radio" name="amountInputMode" value="total" checked>
+              <span>Informar Valor Total</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="amountInputMode" value="installment">
+              <span>Informar Valor da Parcela</span>
+            </label>
+          </div>
+
+          <div class="form-grid-3">
+            <div class="form-group">
+              <label for="txAmountInput" id="txAmountLabel">Valor Total (R$) *</label>
+              <input type="number" id="txAmountInput" step="0.01" min="0.01" placeholder="0,00" required>
+            </div>
+
+            <div class="form-group" id="txInstallmentsCountGroup">
+              <label for="txInstallmentCount">Parcelamento</label>
+              <select id="txInstallmentCount"></select>
+            </div>
+
+            <div class="form-group">
+              <label for="txFirstBillingMonth">Mês da 1ª Cobrança / Fatura *</label>
+              <input type="month" id="txFirstBillingMonth" required>
+            </div>
+          </div>
+
+          <div class="billing-hint" id="txBillingHint"></div>
+          <div class="installment-preview" id="txInstallmentPreview"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="txNotes">Observações (opcional)</label>
+          <textarea id="txNotes" rows="2" placeholder="Detalhes da compra, loja, garantia..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost close-modal" data-close-modal="transactionModalBackdrop">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveTransaction">Salvar Lançamento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: AGENDA (COMPROMISSO / TAREFA) -->
+  <div class="modal-backdrop hidden" id="agendaModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="agendaModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="agendaModalTitle">Novo Compromisso / Tarefa</h3>
+        <button type="button" class="btn-icon close-modal" data-close-modal="agendaModalBackdrop" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="agendaForm" class="modal-body">
+        <input type="hidden" id="agId">
+
+        <div class="type-switcher" role="group" aria-label="Tipo de item da agenda">
+          <button type="button" class="type-btn active" data-ag-type="event">Compromisso (Com Horário)</button>
+          <button type="button" class="type-btn" data-ag-type="task">Tarefa (Checklist)</button>
+        </div>
+        <input type="hidden" id="agItemType" value="event">
+
+        <div class="form-grid-2">
+          <div class="form-group span-2">
+            <label for="agTitle">Título *</label>
+            <input type="text" id="agTitle" placeholder="Ex: Reunião de projeto, Dentista, Pagar fatura..." required>
+          </div>
+
+          <div class="form-group">
+            <label for="agScope">Contexto *</label>
+            <select id="agScope" required>
+              <option value="pessoal">Pessoal</option>
+              <option value="trabalho">Trabalho</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="agDate">Data *</label>
+            <input type="date" id="agDate" required>
+          </div>
+
+          <div class="form-group" id="agStartTimeGroup">
+            <label for="agStartTime">Horário de Início</label>
+            <input type="time" id="agStartTime" value="09:00">
+          </div>
+
+          <div class="form-group" id="agEndTimeGroup">
+            <label for="agEndTime">Horário de Término</label>
+            <input type="time" id="agEndTime" value="10:00">
+          </div>
+
+          <div class="form-group">
+            <label for="agPriority">Prioridade</label>
+            <select id="agPriority">
+              <option value="media">Média</option>
+              <option value="alta">Alta</option>
+              <option value="baixa">Baixa</option>
+            </select>
+          </div>
+
+          <div class="form-group checkbox-inline-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="agCompleted">
+              <span>Marcar como concluído</span>
+            </label>
+          </div>
+
+          <div class="form-group span-2">
+            <label for="agNotes">Observações / Link / Local</label>
+            <textarea id="agNotes" rows="2" placeholder="Link da reunião, endereço, anotações..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger hidden" id="btnDeleteAgendaItem">Excluir</button>
+          <div class="spacer"></div>
+          <button type="button" class="btn btn-ghost close-modal" data-close-modal="agendaModalBackdrop">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar na Agenda</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: CARTÃO DE CRÉDITO -->
+  <div class="modal-backdrop hidden" id="cardModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="cardModalTitle">
+    <div class="modal-card modal-sm">
+      <div class="modal-header">
+        <h3 id="cardModalTitle">Cadastrar Cartão de Crédito</h3>
+        <button type="button" class="btn-icon close-modal" data-close-modal="cardModalBackdrop" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="cardForm" class="modal-body">
+        <input type="hidden" id="cardId">
+        <div class="form-grid-2">
+          <div class="form-group span-2">
+            <label for="cardName">Nome do Cartão *</label>
+            <input type="text" id="cardName" placeholder="Ex: Nubank, Itaú Black, Inter..." required>
+          </div>
+
+          <div class="form-group">
+            <label for="cardLimit">Limite Total (R$) *</label>
+            <input type="number" id="cardLimit" step="0.01" min="1" placeholder="5000,00" required>
+          </div>
+
+          <div class="form-group">
+            <label for="cardColor">Cor do Cartão</label>
+            <div class="color-picker-row" id="cardColorPresets">
+              <button type="button" class="color-swatch active" data-color="#8b5cf6" style="background:#8b5cf6" aria-label="Roxo"></button>
+              <button type="button" class="color-swatch" data-color="#f97316" style="background:#f97316" aria-label="Laranja"></button>
+              <button type="button" class="color-swatch" data-color="#3b82f6" style="background:#3b82f6" aria-label="Azul"></button>
+              <button type="button" class="color-swatch" data-color="#10b981" style="background:#10b981" aria-label="Verde"></button>
+              <button type="button" class="color-swatch" data-color="#ec4899" style="background:#ec4899" aria-label="Rosa"></button>
+              <button type="button" class="color-swatch" data-color="#1e293b" style="background:#1e293b" aria-label="Escuro"></button>
+              <input type="color" id="cardColor" value="#8b5cf6" title="Cor personalizada">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="cardClosingDay">Dia de Fechamento (1–31) *</label>
+            <input type="number" id="cardClosingDay" min="1" max="31" value="5" required>
+          </div>
+
+          <div class="form-group">
+            <label for="cardDueDay">Dia de Vencimento (1–31) *</label>
+            <input type="number" id="cardDueDay" min="1" max="31" value="12" required>
+          </div>
+        </div>
+
+        <p class="form-help">
+          Compras feitas a partir do dia de fechamento entram automaticamente como sugestão para a fatura do mês seguinte.
+        </p>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost close-modal" data-close-modal="cardModalBackdrop">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Cartão</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 4: SINCRONIZAÇÃO AUTOMÁTICA NA NUVEM -->
+  <div class="modal-backdrop hidden" id="cloudModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="cloudModalTitle">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <h3 id="cloudModalTitle">Sincronização Automática (PC &harr; Celular)</h3>
+        <button type="button" class="btn-icon close-modal" data-close-modal="cloudModalBackdrop" aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Painel quando já está conectado -->
+        <div id="cloudConnectedBox" class="cloud-status-banner hidden">
+          <div class="cloud-status-banner-top">
+            <div>
+              <strong id="cloudConnectedStatusTitle">Conectado à Nuvem</strong>
+              <p class="panel-subtitle" id="cloudLastSyncInfo">Última sincronização: agora mesmo</p>
+            </div>
+            <span class="badge badge-paid">Sincronização Ativa</span>
+          </div>
+          <div class="cloud-connected-actions">
+            <button type="button" class="btn btn-sm btn-primary" id="btnCloudSyncNow">&#128260; Sincronizar Agora</button>
+            <button type="button" class="btn btn-sm btn-secondary" id="btnCopyMagicSyncLink">&#128242; Copiar Link Mágico para o Celular</button>
+            <button type="button" class="btn btn-sm btn-danger" id="btnCloudDisconnect">Desconectar Nuvem</button>
+          </div>
+          <p class="form-help">
+            <strong>Dica:</strong> Após publicar o site (Netlify/GitHub Pages), abra o site no PC, clique em <strong>Copiar Link Mágico</strong> e envie para você no WhatsApp. Ao abrir esse link no celular uma vez, o celular já conecta sozinho!
+          </p>
+        </div>
+
+        <!-- Formulário de configuração / conexão -->
+        <form id="cloudSetupForm" class="cloud-setup-form">
+          <p class="panel-subtitle">
+            Escolha um serviço gratuito para manter seus gastos, cartões e agenda sincronizados automaticamente entre PC e celular:
+          </p>
+
+          <div class="type-switcher" id="cloudProviderTabs" role="group" aria-label="Provedor de sincronização">
+            <button type="button" class="type-btn active" data-cloud-provider="github">GitHub Gist Privado (Fácil)</button>
+            <button type="button" class="type-btn" data-cloud-provider="firebase">Firebase (Google Grátis)</button>
+          </div>
+          <input type="hidden" id="cloudProviderInput" value="github">
+
+          <!-- Campos GitHub Gist -->
+          <div id="cloudGithubFields" class="cloud-provider-fields">
+            <div class="cloud-guide-box">
+              <strong>Como configurar em 3 passos (100% gratuito):</strong>
+              <ol>
+                <li>Acesse <a href="https://github.com/settings/tokens/new?description=AgendaFinancasSync&scopes=gist" target="_blank" rel="noopener noreferrer">github.com/settings/tokens</a> e gere um Token (Classic) marcando apenas a caixinha <strong><code>gist</code></strong>.</li>
+                <li>Cole o token abaixo (ele fica salvo apenas no seu navegador).</li>
+                <li>Deixe o <strong>ID do Gist</strong> em branco na primeira vez — o app cria o arquivo privado na sua conta automaticamente.</li>
+              </ol>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group span-2">
+                <label for="cloudGithubToken">Token do GitHub (Permissão "gist") *</label>
+                <input type="password" id="cloudGithubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+              </div>
+              <div class="form-group span-2">
+                <label for="cloudGithubGistId">ID do Gist (opcional — preencha só se já tiver um criado)</label>
+                <input type="text" id="cloudGithubGistId" placeholder="Deixe vazio para criar automaticamente">
+              </div>
+            </div>
+          </div>
+
+          <!-- Campos Firebase Realtime Database -->
+          <div id="cloudFirebaseFields" class="cloud-provider-fields hidden">
+            <div class="cloud-guide-box">
+              <strong>Como configurar com Firebase (Google):</strong>
+              <ol>
+                <li>Crie um projeto gratuito no <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer">Console do Firebase</a> e ative o <strong>Realtime Database</strong>.</li>
+                <li>Cole abaixo a URL do banco (ex.: <code>https://seu-projeto-default-rtdb.firebaseio.com</code>) e defina uma chave pessoal secreta.</li>
+              </ol>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group span-2">
+                <label for="cloudFirebaseUrl">URL do Realtime Database *</label>
+                <input type="url" id="cloudFirebaseUrl" placeholder="https://meu-projeto-default-rtdb.firebaseio.com">
+              </div>
+              <div class="form-group span-2">
+                <label for="cloudFirebaseKey">Código / Chave Pessoal *</label>
+                <input type="text" id="cloudFirebaseKey" placeholder="Ex: minha-chave-agenda-2026">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="cloudInitialConflictMode">Ao conectar pela primeira vez:</label>
+            <select id="cloudInitialConflictMode">
+              <option value="smart">Sincronizar automaticamente (mantém o mais recente / envia local se nuvem vazia)</option>
+              <option value="push">Enviar os dados deste aparelho para a nuvem (sobrescrever nuvem)</option>
+              <option value="pull">Baixar os dados que já estão na nuvem para este aparelho</option>
+            </select>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost close-modal" data-close-modal="cloudModalBackdrop">Fechar</button>
+            <button type="submit" class="btn btn-primary" id="btnCloudSaveConnect">Conectar e Sincronizar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast de Notificação -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
