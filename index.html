@@ -107,6 +107,36 @@
     <main class="main-content">
       <!-- ABA 1: VISÃO GERAL -->
       <section id="tab-overview" class="tab-panel active">
+        <div class="panel-card" style="margin-bottom: 20px;">
+          <div class="panel-header wrap">
+            <div>
+              <h2 id="overviewAgendaTitle">Minha Agenda de Hoje</h2>
+              <p class="panel-subtitle" id="overviewAgendaSubtitle">Compromissos e tarefas do dia selecionado</p>
+            </div>
+            <div class="overview-agenda-controls">
+              <div class="day-navigator" role="group" aria-label="Navegar pelos dias da agenda">
+                <button type="button" class="btn-icon" id="btnOverviewPrevDay" title="Dia anterior" aria-label="Dia anterior">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <span class="day-nav-label" id="overviewDayNavLabel">Hoje</span>
+                <button type="button" class="btn-icon" id="btnOverviewNextDay" title="Próximo dia" aria-label="Próximo dia">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+                <button type="button" class="btn-today" id="btnOverviewToday" title="Voltar para hoje">Hoje</button>
+              </div>
+              <div class="segmented-control sm" id="overviewAgendaFilter">
+                <button type="button" class="seg-btn active" data-scope="all">Todos</button>
+                <button type="button" class="seg-btn" data-scope="pessoal">Pessoal</button>
+                <button type="button" class="seg-btn" data-scope="trabalho">Trabalho</button>
+              </div>
+            </div>
+          </div>
+          <div id="overviewAgendaList" class="stack-list"></div>
+          <div class="panel-footer">
+            <button type="button" class="btn btn-sm btn-ghost" data-goto-tab="agenda">Abrir Calendário e Horários</button>
+          </div>
+        </div>
+
         <div class="summary-cards-grid" id="overviewSummaryCards">
           <!-- Renderizado via JS -->
         </div>
@@ -137,38 +167,8 @@
             </div>
           </div>
 
-          <!-- Coluna Direita: Agenda do Dia & Compras Recentes -->
+          <!-- Coluna Direita: Movimentações Recentes -->
           <div class="overview-col">
-            <div class="panel-card">
-              <div class="panel-header wrap">
-                <div>
-                  <h2 id="overviewAgendaTitle">Minha Agenda de Hoje</h2>
-                  <p class="panel-subtitle" id="overviewAgendaSubtitle">Compromissos e tarefas do dia selecionado</p>
-                </div>
-                <div class="overview-agenda-controls">
-                  <div class="day-navigator" role="group" aria-label="Navegar pelos dias da agenda">
-                    <button type="button" class="btn-icon" id="btnOverviewPrevDay" title="Dia anterior" aria-label="Dia anterior">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                    </button>
-                    <span class="day-nav-label" id="overviewDayNavLabel">Hoje</span>
-                    <button type="button" class="btn-icon" id="btnOverviewNextDay" title="Próximo dia" aria-label="Próximo dia">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    </button>
-                    <button type="button" class="btn-today" id="btnOverviewToday" title="Voltar para hoje">Hoje</button>
-                  </div>
-                  <div class="segmented-control sm" id="overviewAgendaFilter">
-                    <button type="button" class="seg-btn active" data-scope="all">Todos</button>
-                    <button type="button" class="seg-btn" data-scope="pessoal">Pessoal</button>
-                    <button type="button" class="seg-btn" data-scope="trabalho">Trabalho</button>
-                  </div>
-                </div>
-              </div>
-              <div id="overviewAgendaList" class="stack-list"></div>
-              <div class="panel-footer">
-                <button type="button" class="btn btn-sm btn-ghost" data-goto-tab="agenda">Abrir Calendário e Horários</button>
-              </div>
-            </div>
-
             <div class="panel-card">
               <div class="panel-header wrap">
                 <div>
